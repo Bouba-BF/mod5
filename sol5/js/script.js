@@ -83,7 +83,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
 showLoading("#main-content");
 $ajaxUtils.sendGetRequest(
   allCategoriesUrl,
-  [...], // ***** <---- TODO: STEP 1: Substitute [...] ******
+   function (responseText){
+    document.querySelector("#main-content")
+      .innerHTML = responseText;
+  }, // ***** <---- TODO: STEP 1: Substitute [...] ******
   true); // Explicitely setting the flag to get JSON from server processed into an object literal
 });
 // *** finish **
@@ -97,6 +100,22 @@ function buildAndShowHomeHTML (categories) {
   $ajaxUtils.sendGetRequest(
     homeHtmlUrl,
     function (homeHtml) {
+      $ajaxUtils.sendGetRequest(
+        homeHtmlUrl,
+        function(homeHtmlUrl) {
+          switchMenuToActive();
+
+          var chosenCategoryShortName = 
+             buildCategoriesViewHtml (category,
+                                 homeHtmlUrl,
+                                 home);
+             insertHtml("#main-content", menuItemsViewHtml);
+        }
+          false);
+       },
+
+       false);
+ }  
 
       // TODO: STEP 2: Here, call chooseRandomCategory, passing it retrieved 'categories'
       // Pay attention to what type of data that function returns vs what the chosenCategoryShortName
@@ -115,7 +134,56 @@ function buildAndShowHomeHTML (categories) {
       // Hint: you need to surround the chosen category short name with something before inserting
       // it into the home html snippet.
       //
-      // var homeHtmlToInsertIntoMainPage = ....
+      var homeHtmlToInsertIntoMainPage = categoryHtml.homeHtmlUrl;
+      var catShortName = categoryHtml.category.short_name;
+
+      for (var i = 0; i < menuItems.length; i++) {
+    // Insert menu item values
+    var html = menuItemHtml;
+    html =
+      insertProperty(html, "short_name", menuItems[i].short_name);
+    html =
+      insertProperty(html,
+                     "catShortName",
+                     catShortName);
+    html =
+      insertItemPrice(html,
+                      "price_small",
+                      menuItems[i].price_small);
+    html =
+      insertItemPortionName(html,
+                            "small_portion_name",
+                            menuItems[i].small_portion_name);
+    html =
+      insertItemPrice(html,
+                      "price_large",
+                      menuItems[i].price_large);
+    html =
+      insertItemPortionName(html,
+                            "large_portion_name",
+                            menuItems[i].large_portion_name);
+    html =
+      insertProperty(html,
+                     "name",
+                     menuItems[i].name);
+    html =
+      insertProperty(html,
+                     "description",
+                     menuItems[i].description);
+
+    // Add clearfix after every second menu item
+    if (i % 2 != 0) {
+      html +=
+        "<div class='clearfix visible-lg-block visible-md-block'></div>";
+    }
+
+    finalHtml += html;
+  }
+
+  finalHtml += "</section>";
+  return finalHtml;
+}
+
 
 
       // TODO: STEP 4: Insert the the produced HTML in STEP 3 into the main page
